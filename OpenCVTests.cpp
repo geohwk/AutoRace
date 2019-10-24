@@ -5,64 +5,43 @@
 using namespace cv;
 using namespace std;
 using std::cout;
-int U = 1, L = 0, Hu = 100, Su = 255, Vu = 255, Hl = 0, Sl = 150, Vl = 150;
+
+
+int Hu = 100, Su = 255, Vu = 255, Hl = 0, Sl = 150, Vl = 150;
 int contourWidth = 75;					//contour width less than this size gets disregarded
 
-const int alpha_slider_max = 100;
-int alpha_slider;
-double alpha;
-double beta;
-Mat src1;
-Mat src2;
-Mat dst;
 
-void tuning()
+void trackbars()
 {
-	
+	namedWindow("HSV Tuning", WINDOW_AUTOSIZE);
+	createTrackbar("Upper H", "HSV Tuning", &Hu, 255);
+	createTrackbar("Upper S", "HSV Tuning", &Su, 255);
+	createTrackbar("Upper V", "HSV Tuning", &Vu, 255);
+	createTrackbar("Lower H", "HSV Tuning", &Hl, 255);
+	createTrackbar("Lower S", "HSV Tuning", &Sl, 255);
+	createTrackbar("Lower V", "HSV Tuning", &Vl, 255);
 }
 
-static void on_trackbar(int, void*)
-{
-	//alpha = (double)U / 255;
-	//beta = (1.0 - alpha);
-	//addWeighted(src1, alpha, src2, beta, 0.0, dst);
-	//imshow("HSV Tuning", dst);
-}
 
 int main(int argc, char* argv[])
 {
 	VideoCapture cap(0); // open the video camera no. 0
 
-	
 	if (!cap.isOpened())  // if not success, exit program
 	{
 		cout << "Cannot open the video cam" << endl;
 		return -1;
 	}
-	
+	 
+	Mat background;
 
-	//Mat 
-	Mat background = imread("FakeRoad.png");
-	namedWindow("HSV Tuning", WINDOW_AUTOSIZE);
+	trackbars();
 
-	char TrackbarName[50];
-	//sprintf(TrackbarName, "Alpha x %d", 255);
-	createTrackbar("Upper H", "HSV Tuning", &Hu, 255, on_trackbar);
-	createTrackbar("Upper S", "HSV Tuning", &Su, 255, on_trackbar);
-	createTrackbar("Upper V", "HSV Tuning", &Vu, 255, on_trackbar);
-	createTrackbar("Lower H", "HSV Tuning", &Hl, 255, on_trackbar);
-	createTrackbar("Lower S", "HSV Tuning", &Sl, 255, on_trackbar);
-	createTrackbar("Lower V", "HSV Tuning", &Vl, 255, on_trackbar);
-
-	on_trackbar(alpha_slider, 0);
-
-	
 	for (int i = 0; i < 30; i++)
 	{
 		cap >> background;
 	}
 	
-
 	//Invert the image
 	flip(background, background, 1);
 	
@@ -128,19 +107,17 @@ int main(int argc, char* argv[])
 			Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
 			Point2f rect_points[4];
 			minRect[entry].points(rect_points);
+
 			if (minRect[entry].size.height > contourWidth)
 			{
 				for (int j = 0; j < 4; j++)line(drawing, rect_points[j], rect_points[(j + 1) % 4], color, 1, 8);
 				frame = drawing + frame;
 			}
-			
-			
-			//Mat kernel = Mat::ones(10, 10, CV_32F);
-			//morphologyEx(mask1, mask1, cv::MORPH_OPEN, kernel);
 		}
-		namedWindow("Contours", WINDOW_AUTOSIZE);
-		imshow("Contours", frame);
-		imshow("Mask1", mask1);
+
+		//Creat Viewing Windows
+		imshow("Original Image", frame);
+		imshow("Binary", mask1);
 		waitKey(1);
 		
 	}
