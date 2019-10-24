@@ -7,8 +7,12 @@ using namespace std;
 using std::cout;
 
 
+//CONSTANTS
+const int contourWidth = 0; //contour width less than this size gets disregarded
+
+//GLOBALS
 int Hu = 100, Su = 255, Vu = 255, Hl = 0, Sl = 150, Vl = 150;
-int contourWidth = 75;					//contour width less than this size gets disregarded
+				
 
 
 void trackbars()
@@ -33,31 +37,34 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	 
-	Mat background;
+	
 
 	trackbars();
 
+	/*
 	for (int i = 0; i < 30; i++)
 	{
 		cap >> background;
 	}
-	
+	*/
+
 	//Invert the image
-	flip(background, background, 1);
+	//flip(background, background, 1);
 	
 	//frame = background;
 	while(1){
+		Mat background = imread("FakeRoad.png");
 		//tuning();
-		Mat frame;
+		//Mat frame;
 		//Capture frame-by-frame
-		cap >> frame;
+		//cap >> frame;
 		
 		//Laterally invert the image / flip the image
-		flip(frame, frame, 1);
+		//flip(frame, frame, 1);
 
 		//Converting image from BGR to HSV color space.
 		Mat hsv;
-		cvtColor(frame, hsv, COLOR_BGR2HSV);
+		cvtColor(background, hsv, COLOR_BGR2HSV);
 
 		Mat mask1, mask2;
 		// Creating masks to detect the upper and lower red color.
@@ -110,13 +117,13 @@ int main(int argc, char* argv[])
 
 			if (minRect[entry].size.height > contourWidth)
 			{
-				for (int j = 0; j < 4; j++)line(drawing, rect_points[j], rect_points[(j + 1) % 4], color, 1, 8);
-				frame = drawing + frame;
+				for (int j = 0; j < 4; j++)line(drawing, rect_points[j], rect_points[(j + 1) % 4], color, 5, 8);
+				background = drawing + background;
 			}
 		}
 
 		//Creat Viewing Windows
-		imshow("Original Image", frame);
+		imshow("Original Image", background);
 		imshow("Binary", mask1);
 		waitKey(1);
 		
