@@ -8,12 +8,12 @@ using std::cout;
 
 
 //CONSTANTS
-const int contourWidth = 0; //contour width less than this size gets disregarded
+const int contourRatio = 5; //contour aspect ratio less than this size gets disregarded
 
 //GLOBALS
 int Hu = 100, Su = 255, Vu = 255, Hl = 0, Sl = 150, Vl = 150;
 				
-
+int frameIncrement = 0;
 
 void trackbars()
 {
@@ -84,41 +84,63 @@ int main(int argc, char* argv[])
 		findContours(mask1, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0));
 		
 		//Make drawing canvas 
-		Mat drawing = Mat::zeros(mask1.size(), CV_8UC3);
+		Mat drawing1 = Mat::zeros(mask1.size(), CV_8UC3);
+		Mat drawing2 = Mat::zeros(mask1.size(), CV_8UC3);
 		
 		//Minimum Area Rectangle object creation
-		vector<RotatedRect> minRect(contours.size());
+		vector<RotatedRect> minRect1(contours.size());
+		vector<RotatedRect> minRect2(contours.size());
 
-		double storedArea = 0;
+		double storedArea1 = 0;
+		double storedArea2 = 0;
 		double area = 0;
-		int entry = 0;
+		int contour1 = 0;
+		int contour2 = 0;
 
 		//If contours are found
 		if (contours.size() > 0)
 		{
 			for (int i = 0; i < contours.size(); i++)
 			{
-				storedArea = contourArea(contours[i], 1);
-				if (storedArea < 0)
+				area = contourArea(contours[i], 1);
+				if (area < 0)
 				{
-					storedArea = storedArea * -1;
+					area = area * -1;
 				}
-				if (storedArea > area)
+
+
+				if (area > storedArea2 && area < storedArea1)
 				{
-					area = storedArea;
-					entry = i;
+					storedArea2 = area;
+					contour2 = i;
+				}
+				if (area > storedArea2 && area > storedArea1)
+				{
+					storedArea2 = storedArea1;
+					contour2 = contour1;
+					storedArea1 = area;
+					contour1 = i;
 				}
 			}
 
-			minRect[entry] = minAreaRect(Mat(contours[entry]));
-			Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-			Point2f rect_points[4];
-			minRect[entry].points(rect_points);
+			minRect1[contour1] = minAreaRect(Mat(contours[contour1]));
+			minRect2[contour2] = minAreaRect(Mat(contours[contour2]));
+			Scalar color = Scalar(rng.uniform(0, 0), rng.uniform(0, 255), rng.uniform(0, 255));
+			Scalar color2 = Scalar(rng.uniform(0, 255), rng.uniform(0, 0), rng.uniform(0, 255));
+			Point2f rect_points1[4];
+			Point2f rect_points2[4];
+			minRect1[contour1].points(rect_points1);
+			minRect2[contour2].points(rect_points2);
 
-			if (minRect[entry].size.height > contourWidth)
+			if ((minRect1[contour1].size.height/minRect1[contour1].size.width > contourRatio)|| (minRect1[contour1].size.width / minRect1[contour1].size.height > contourRatio))
 			{
-				for (int j = 0; j < 4; j++)line(drawing, rect_points[j], rect_points[(j + 1) % 4], color, 5, 8);
-				background = drawing + background;
+				for (int j = 0; j < 4; j++)line(drawing1, rect_points1[j], rect_points1[(j + 1) % 4], color, 5, 8);
+				background = drawing1 + background;
+			}
+			if ((minRect2[contour2].size.height / minRect2[contour2].size.width > contourRatio) || (minRect2[contour2].size.width / minRect2[contour2].size.height > contourRatio))
+			{
+				for (int j = 0; j < 4; j++)line(drawing2, rect_points2[j], rect_points2[(j + 1) % 4], color2, 5, 8);
+				background = drawing2 + background;
 			}
 		}
 
