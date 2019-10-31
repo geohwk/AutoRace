@@ -1,6 +1,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <iostream>
 #include "opencv2/imgproc/imgproc.hpp"
+#include <string>
 
 using namespace cv;
 using namespace std;
@@ -14,6 +15,8 @@ const int contourRatio = 5; //contour aspect ratio less than this size gets disr
 int Hu = 100, Su = 255, Vu = 255, Hl = 0, Sl = 150, Vl = 150;
 				
 int frameIncrement = 0;
+
+string imagePath;
 
 void trackbars()
 {
@@ -37,8 +40,6 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	 
-	
-
 	trackbars();
 
 	/*
@@ -53,7 +54,27 @@ int main(int argc, char* argv[])
 	
 	//frame = background;
 	while(1){
-		Mat background = imread("FakeRoad.png");
+		frameIncrement++;
+		switch (frameIncrement) {
+		case 1: imagePath = "FakeRoad1.png";
+			break;       
+		case 2: imagePath = "FakeRoad2.png";
+			break;
+		case 3: imagePath = "FakeRoad3.png";
+			break;
+		case 5: imagePath = "FakeRoad4.png";
+			break;
+		case 8: imagePath = "FakeRoad5.png";
+			break;
+		case 9: frameIncrement = 0;
+			break;
+		default:
+			break;
+		}
+
+
+
+		Mat background = imread(imagePath);
 		//tuning();
 		//Mat frame;
 		//Capture frame-by-frame
