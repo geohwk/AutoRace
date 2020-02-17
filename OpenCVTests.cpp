@@ -5,6 +5,8 @@
 #include <thread>
 #include <chrono>
 #include <time.h>
+#include <wiringPi.h>
+#define SLAVE_ADDRESS 0x04
 #pragma warning(disable:4996)
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
@@ -245,12 +247,27 @@ int main(int argc, char* argv[])
 		line(background, centralPt3, centralPt4, CV_RGB(0, 255, 0));
 
 		Difference = "Difference: " + to_string(differenceVal);
-		if(differenceVal < 0){
+		if(differenceVal > 0){
 			Direction = "Direction: Turn Left";
 		}
 		else {
 			Direction = "Direction: Turn Right";
 		}
+		int fd;
+
+		if ((fd = serialOpen("/dev/ttyUSB0", 9600)) < 0)cout << "Unable to open device" << endl;
+
+		if (wiringPiSetup() == -1)cout << "Unable to start wiringPi" << endl;
+
+
+		for (int count = 0; count < 256;)
+		{
+			fflush(stdout);
+			serialPutchar(fd, differenceVal);
+			++count;
+			delay(100);
+		}
+		
 
 		putText(background, Difference, Point(30, 30),FONT_HERSHEY_PLAIN, 0.8, Scalar(200, 200, 250), 1, false);
 		putText(background, Direction, Point(30, 50), FONT_HERSHEY_PLAIN, 0.8, Scalar(200, 200, 250), 1, false);
